@@ -157,14 +157,14 @@ class SavingAccount extends Account {
     SavingAccount(String name, double firstDeposit) {
         super(name, firstDeposit);
     }
-    // TODO: implements another constructor
 
-    // public double withdraw(double amount) throws BankingException {
-    // return super.withdraw(amount);
-    // }
+    SavingAccount(String name, double firstDeposit, Date firstDate) {
+        super(name, firstDeposit, firstDate);
+    }
 
     public double withdraw(double amount, Date withdrawDate) throws BankingException {
         // no minimum balance.
+        // TODO:
         // fee of $1 for every transaction except the first three per month are free
         accountBalance -= transactionFee;
         return accountBalance;
@@ -262,7 +262,6 @@ class CDAccount extends Account implements FullFunctionalAccount {
  * withdraw (i.e., loan more money) but of course you can deposit (i.e., pay off
  * part of the loan).
  */
-
 class LoanAccount extends SavingAccount {
     LoanAccount(String name, double firstDeposit) {
         super(name, firstDeposit);
@@ -281,10 +280,6 @@ class LoanAccount extends SavingAccount {
         accountBalance -= amount;
         return accountBalance;
     }
-
-    // public double computeInterest(Date interestDate) throws BankingException {
-    // return 0;
-    // }
 }
 
 class Time {
