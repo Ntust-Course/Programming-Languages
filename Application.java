@@ -72,11 +72,35 @@ public class Application {
         accountList[2] = new CDAccount("Woody Allison", 1000.0);
         accountList[3] = new LoanAccount("Judi Foster", -1500.0);
 
-        // compute interest for all accounts
-        for (int count = 0; count < accountList.length; count++) {
-            double newBalance = accountList[count].computeInterest();
-            System.out.println("Account <" + a.name() + "> now has $" + newBalance + " balance\n");
+        for (Account account : accountList) {
+            // compute interest for all accounts
+            try {
+                double newBalance = account.computeInterest();
+                stdBankingPrinting(account.name(), newBalance);
+            } catch (Exception e) {
+                stdExceptionPrinting(e, account.balance());
+            }
+
+            // deposit for all acounts
+            try {
+                double newBalance = account.deposit(100.0);
+                stdBankingPrinting(account.name(), newBalance);
+            } catch (Exception e) {
+                stdExceptionPrinting(e, account.balance());
+            }
+
+            // withdraw for all accounts
+            try {
+                double newBalance = account.withdraw(100.0);
+                stdBankingPrinting(account.name(), newBalance);
+            } catch (Exception e) {
+                stdExceptionPrinting(e, account.balance());
+            }
         }
+    }
+
+    static void stdBankingPrinting(String accountName, double balance) {
+        System.out.println("Account: <" + accountName + "> now has $" + balance + " balance.");
     }
 
     static void stdExceptionPrinting(Exception e, double balance) {
