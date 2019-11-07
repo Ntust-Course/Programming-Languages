@@ -55,11 +55,11 @@ public abstract class Account {
     protected Date lastInterestDate;
 
     // constructor for every bank accounts
-    Account(String name, double firstDeposit) {
+    public Account(String name, double firstDeposit) {
         this(name, firstDeposit, new Date());
     }
 
-    Account(String name, double firstDeposit, Date firstDate) {
+    public Account(String name, double firstDeposit, Date firstDate) {
         accountName = name;
         accountBalance = firstDeposit;
         openDate = firstDate;
@@ -172,7 +172,6 @@ class SavingAccount extends Account {
 
     public double computeInterest(Date interestDate) throws BankingException {
         // monthly interest
-        // TODO: copy to CDAccount
         if (interestDate.before(lastInterestDate)) {
             throw new BankingException("Invalid date to compute interest for account name" + accountName);
         }
@@ -198,14 +197,14 @@ class SavingAccount extends Account {
 
 class CDAccount extends Account implements FullFunctionalAccount {
 
-    private long duration;
+    private long duration = 12 * Time.month;
 
     CDAccount(String name, double firstDeposit) {
-        this(s, firstDeposit, new Date(), 12);
+        super(name, firstDeposit, new Date());
     }
 
     CDAccount(String name, double firstDeposit, Date firstDate) {
-        this(s, firstDeposit, firstDate, 12);
+        super(name, firstDeposit, firstDate);
     }
 
     CDAccount(String name, double firstDeposit, Date firstDate, int month) {
@@ -217,8 +216,8 @@ class CDAccount extends Account implements FullFunctionalAccount {
      * withdraw cost $250 fee before duration
      */
     public double withdraw(double amount, Date withdrawDate) throws BankingException {
-        // withdrawals cost a $250 fee for the between duration
-        if (openDate.getTime() < new Date().getTime() - duration) {
+        if (!afterDuration()) {
+            System.out.println("NOTICE: withdraw cost $250 fee before duration!");
             accountBalance -= 250;
         }
         accountBalance -= amount;
@@ -226,18 +225,31 @@ class CDAccount extends Account implements FullFunctionalAccount {
     }
 
     public double deposit(double amount) throws BankingException {
-        if (new Date().after(Date(openDate.getTime() + duration))) {
+        // we can't deposit before duration end
+        if (!afterDuration()) {
             throw new BankingException("Can't deposit during interest.");
         }
         return super.deposit(amount);
     }
 
-    // at the end of the duration the interest payments stop and you can withdraw
-    // w/o fee.
-
     public double computeInterest(Date interestDate) throws BankingException {
-        // TODO: copy from SavingAccount
-        return 0;
+        if (interestDate.before(lastInterestDate)) {
+            throw new BankingException("Invalid date to compute interest for account name: " + accountName);
+        }
+
+        if (!afterDuration()) {
+            int numberOfMonths = (int) ((interestDate.getTime() - lastInterestDate.getTime()) / Time.month);
+            System.out.println("Number of months since last interest is " + numberOfMonths);
+            double interestEarned = (double) numberOfMonths / 12.0 * accountInterestRate * accountBalance;
+            System.out.println("Interest earned is " + interestEarned);
+            lastInterestDate = interestDate;
+            accountBalance += interestEarned;
+        }
+        return accountBalance;
+    }
+
+    public boolean afterDuration() {
+        return new Date().after(new Date(openDate.getTime() + duration));
     }
 
 }
@@ -269,10 +281,14 @@ class LoanAccount extends SavingAccount {
         accountBalance -= amount;
         return accountBalance;
     }
+
+    // public double computeInterest(Date interestDate) throws BankingException {
+    // return 0;
+    // }
 }
 
 class Time {
-    final static long day = 30 * 24 * 60 * 60 * 1000;
+    final static long day = 30 * 24 * 60 * 60 * 1000L;
     final static long month = 30 * day;
     final static long year = 12 * month;
 }
