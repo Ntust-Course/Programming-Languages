@@ -1,0 +1,75 @@
+@startuml
+interface BasicAccount {
+    +name(): String
+    +balance(): double
+}
+
+interface WithdrawableAccount extends BasicAccount {
+    +withdraw(double amount): double
+}
+
+interface DepositableAccount extends BasicAccount {
+    +deposit(double amount): double
+}
+
+interface InterestableAccount extends BasicAccount {
+    +computeInterest(): double
+}
+
+interface FullFunctionalAccount extends WithdrawableAccount, DepositableAccount, InterestableAccount {
+}
+
+abstract class Account {
+    #accountName: String
+    #accountBalance: double
+    #accountInterestRate: double
+    #openDate: Date
+    #lastInterestDate: Date
+
+    // 建構子
+    +Account (String, double, Date)
+
+    +name(): String
+    +balance(): double
+    +deposit(double): double
+    +withdraw(double): double
+    +{abstract} withdraw(double, Date): double
+}
+
+class CheckingAccount extends Account implements FullFunctionalAccount {
+    +withdraw(double, Date): double
+    +computeInterest(Date): double
+}
+
+class SavingAccount extends Account implements FullFunctionalAccount {
+    -transactionCount: int
+    -lastTransactionDate: Date
+    -transactionFee: int
+
+    +withdraw(double, Date): double
+    +computeInterest(Date): double
+    -isNewMonth(): boolean
+}
+
+class CDAccount extends Account implements FullFunctionalAccount {
+    -duration: long
+
+    +withdraw(double, Date): double
+    +deposit(double): double
+    +computeInterest(Date): double
+    +afterDuration(): boolean
+}
+
+class LoanAccount extends SavingAccount {
+    +LoanAccount(String, double)
+
+    +double withdraw(double)
+    +double deposit(double)
+}
+
+class Time {
+    {static} +long day
+    {static} +long month
+    {static} +long year
+}
+@enduml
