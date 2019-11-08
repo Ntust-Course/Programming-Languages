@@ -80,7 +80,10 @@ public abstract class Account {
         return accountBalance;
     }
 
-    abstract double withdraw(double amount, Date withdrawDate) throws BankingException;
+    public double withdraw(double amount, Date withdrawDate) throws BankingException {
+        accountBalance -= amount;
+        return accountBalance;
+    }
 
     public double withdraw(double amount) throws BankingException {
         Date withdrawDate = new Date();
@@ -118,8 +121,7 @@ class CheckingAccount extends Account implements FullFunctionalAccount {
         if ((accountBalance - amount) < 1000) {
             throw new BankingException("Underfraft from checking account name: " + accountName);
         }
-        accountBalance -= amount;
-        return accountBalance;
+        return super.withdraw(amount, withdrawDate);
     }
 
     public double computeInterest(Date interestDate) throws BankingException {
@@ -145,14 +147,16 @@ class CheckingAccount extends Account implements FullFunctionalAccount {
  * 
  * @author SheiUn
  */
-class SavingAccount extends Account {
+class SavingAccount extends Account implements FullFunctionalAccount {
 
     private int transactionCount = 0;
+    private Date lastTransactionDate = new Date();
     private int transactionFee = 1;
 
     /**
      * @param name         accountName
      * @param firstDeposit amount of first deposit when account opening
+     * @param firstDate    first open date of this account
      */
     SavingAccount(String name, double firstDeposit) {
         super(name, firstDeposit);
@@ -162,12 +166,35 @@ class SavingAccount extends Account {
         super(name, firstDeposit, firstDate);
     }
 
+    /**
+     * no minimum balance.
+     */
     public double withdraw(double amount, Date withdrawDate) throws BankingException {
-        // no minimum balance.
-        // TODO:
-        // fee of $1 for every transaction except the first three per month are free
-        accountBalance -= transactionFee;
-        return accountBalance;
+        processTransaction(withdrawDate);
+        return super.withdraw(amount, withdrawDate);
+    }
+
+    public double deposit(double amount) throws BankingException {
+        processTransaction();
+        return super.deposit(amount);
+    }
+
+    private void processTransaction() {
+        processTransaction(new Date());
+    }
+
+    private void processTransaction(Date transactionDate) {
+        // if today is a new month from last transaction date reset count to 0
+        if (isNewMonth(transactionDate)) {
+            transactionCount = 0;
+        }
+        lastTransactionDate = transactionDate;
+        transactionCount++;
+
+        // the first three per month are free
+        if (transactionCount > 3)
+            // fee of $1 for every transaction
+            accountBalance -= transactionFee;
     }
 
     public double computeInterest(Date interestDate) throws BankingException {
@@ -184,9 +211,21 @@ class SavingAccount extends Account {
         accountBalance += interestEarned;
         return accountBalance;
     }
+
+    /**
+     * Check Year and Month is the same in current date and last transaction date.
+     */
+    private boolean isNewMonth(Date transactionDate) {
+        Calendar currentTransactionCal = Calendar.getInstance();
+        currentTransactionCal.setTime(transactionDate);
+        Calendar lastTransactionCal = Calendar.getInstance();
+        lastTransactionCal.setTime(lastTransactionDate);
+        return lastTransactionCal.get(Calendar.YEAR) != currentTransactionCal.get(Calendar.YEAR)
+                || lastTransactionCal.get(Calendar.MONTH) != currentTransactionCal.get(Calendar.MONTH);
+    }
 }
 
-/*
+/**
  * Derived class: CDAccount
  *
  * Description: monthly interest; fixed amount and duration (e.g., you can open
@@ -194,11 +233,18 @@ class SavingAccount extends Account {
  * and withdrawals cost a $250 fee); at the end of the duration the interest
  * payments stop and you can withdraw w/o fee.
  */
-
 class CDAccount extends Account implements FullFunctionalAccount {
 
+    /**
+     * 12 months by default, save as long just convenient calc with long time
+     */
     private long duration = 12 * Time.month;
 
+    /**
+     * Constructor of CDAccount another params are same as Account
+     * 
+     * @param month duration of interest 12 months by default
+     */
     CDAccount(String name, double firstDeposit) {
         super(name, firstDeposit, new Date());
     }
@@ -220,12 +266,11 @@ class CDAccount extends Account implements FullFunctionalAccount {
             System.out.println("NOTICE: withdraw cost $250 fee before duration!");
             accountBalance -= 250;
         }
-        accountBalance -= amount;
-        return accountBalance;
+        return super.withdraw(amount, withdrawDate);
     }
 
     public double deposit(double amount) throws BankingException {
-        // we can't deposit before duration end
+        // can't deposit before duration end
         if (!afterDuration()) {
             throw new BankingException("Can't deposit during interest.");
         }
@@ -251,16 +296,17 @@ class CDAccount extends Account implements FullFunctionalAccount {
     public boolean afterDuration() {
         return new Date().after(new Date(openDate.getTime() + duration));
     }
-
 }
 
-/*
+/**
  * Derived class: LoanAccount
  *
  * Description: like a saving account, but the balance is "negative" (you owe
  * the bank money, so a deposit will reduce the amount of the loan); you can't
  * withdraw (i.e., loan more money) but of course you can deposit (i.e., pay off
  * part of the loan).
+ * 
+ * @param computeInterest same as SavingAccount
  */
 class LoanAccount extends SavingAccount {
     LoanAccount(String name, double firstDeposit) {
@@ -271,7 +317,7 @@ class LoanAccount extends SavingAccount {
         // }
     }
 
-    public double withdraw(double amount) throws BankingException {
+    public double withdraw(double amount, Date withdrawDate) throws BankingException {
         throw new BankingException("LoanAccount can't withdraw.");
     }
 
@@ -282,6 +328,14 @@ class LoanAccount extends SavingAccount {
     }
 }
 
+/**
+ * Use to calculate common time units.
+ * 
+ * @author SheiUn
+ * @param day   milliseconds of a day
+ * @param month milliseconds of a month
+ * @param year  milliseconds of a year
+ */
 class Time {
     final static long day = 30 * 24 * 60 * 60 * 1000L;
     final static long month = 30 * day;
