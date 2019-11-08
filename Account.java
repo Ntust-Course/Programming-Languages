@@ -64,6 +64,7 @@ public abstract class Account {
         accountBalance = firstDeposit;
         openDate = firstDate;
         lastInterestDate = openDate;
+        accountInterestRate = 0.12;
     }
 
     // public methods for every bank accounts
@@ -107,12 +108,11 @@ public abstract class Account {
 class CheckingAccount extends Account implements FullFunctionalAccount {
 
     CheckingAccount(String name, double firstDeposit) {
-        this(name, firstDeposit, new Date());
+        super(name, firstDeposit);
     }
 
     CheckingAccount(String name, double firstDeposit, Date firstDate) {
         super(name, firstDeposit, firstDate);
-        accountInterestRate = 0.12;
         System.out.println("accountBalance: " + accountBalance);
     }
 
@@ -309,12 +309,18 @@ class CDAccount extends Account implements FullFunctionalAccount {
  * @param computeInterest same as SavingAccount
  */
 class LoanAccount extends SavingAccount {
+
+    /**
+     * TODO: throw Exception on firstDeposit greatEqual 0 <br />
+     * if (firstDeposit >= 0) { throw new BankingException("Balance is always
+     * negative: " + firstDeposit); }
+     */
     LoanAccount(String name, double firstDeposit) {
         super(name, firstDeposit);
-        // TODO: throw Exception on firstDeposit ge than 0
-        // if (firstDeposit >= 0) {
-        // throw new BankingException("Balance is always negative: " + firstDeposit);
-        // }
+    }
+
+    LoanAccount(String name, double firstDeposit, Date firstDate) {
+        super(name, firstDeposit, firstDate);
     }
 
     public double withdraw(double amount, Date withdrawDate) throws BankingException {
