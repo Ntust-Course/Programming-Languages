@@ -39,6 +39,8 @@ interface DepositableAccount extends BasicAccount {
 }
 
 interface InterestableAccount extends BasicAccount {
+    double getEarnedInterest(Date interestDate);
+
     double computeInterest() throws BankingException;
 }
 
@@ -91,11 +93,34 @@ public abstract class Account {
         return withdraw(amount, withdrawDate);
     }
 
-    abstract double computeInterest(Date interestDate) throws BankingException;
+    /**
+     * Calulate daily be default.
+     * 
+     * @param interestDate
+     * @return EnardInterest
+     */
+    public double getEarnedInterest(Date interestDate) {
+        int numberOfDays = (int) ((interestDate.getTime() - lastInterestDate.getTime()) / Time.day);
+        System.out.println("Number of days since last interest is " + numberOfDays);
+        double interestEarned = (double) numberOfDays / 365.0 * accountInterestRate * accountBalance;
+        System.out.println("Interest earned is " + interestEarned);
+        return interestEarned;
+    }
 
     public double computeInterest() throws BankingException {
         Date interestDate = new Date();
         return computeInterest(interestDate);
+    }
+
+    public double computeInterest(Date interestDate) throws BankingException {
+        if (interestDate.before(lastInterestDate)) {
+            throw new BankingException("Invalid date to compute interest for account name: " + accountName);
+        }
+
+        double interestEarned = getEarnedInterest(interestDate);
+        lastInterestDate = interestDate;
+        accountBalance += interestEarned;
+        return accountBalance;
     }
 }
 
@@ -122,20 +147,6 @@ class CheckingAccount extends Account implements FullFunctionalAccount {
             throw new BankingException("Underfraft from checking account name: " + accountName);
         }
         return super.withdraw(amount, withdrawDate);
-    }
-
-    public double computeInterest(Date interestDate) throws BankingException {
-        if (interestDate.before(lastInterestDate)) {
-            throw new BankingException("Invalid date to compute interest for account name: " + accountName);
-        }
-
-        int numberOfDays = (int) ((interestDate.getTime() - lastInterestDate.getTime()) / Time.day);
-        System.out.println("Number of days since last interest is " + numberOfDays);
-        double interestEarned = (double) numberOfDays / 365.0 * accountInterestRate * accountBalance;
-        System.out.println("Interest earned is " + interestEarned);
-        lastInterestDate = interestDate;
-        accountBalance += interestEarned;
-        return accountBalance;
     }
 }
 
@@ -197,19 +208,13 @@ class SavingAccount extends Account implements FullFunctionalAccount {
             accountBalance -= transactionFee;
     }
 
-    public double computeInterest(Date interestDate) throws BankingException {
+    public double getEarnedInterest(Date interestDate) {
         // monthly interest
-        if (interestDate.before(lastInterestDate)) {
-            throw new BankingException("Invalid date to compute interest for account name" + accountName);
-        }
-
         int numberOfMonths = (int) ((interestDate.getTime() - lastInterestDate.getTime()) / Time.month);
         System.out.println("Number of months since last interest is " + numberOfMonths);
         double interestEarned = (double) numberOfMonths / 12.0 * accountInterestRate * accountBalance;
         System.out.println("Interest earned is " + interestEarned);
-        lastInterestDate = interestDate;
-        accountBalance += interestEarned;
-        return accountBalance;
+        return interestEarned;
     }
 
     /**
@@ -277,18 +282,19 @@ class CDAccount extends Account implements FullFunctionalAccount {
         return super.deposit(amount);
     }
 
-    public double computeInterest(Date interestDate) throws BankingException {
-        if (interestDate.before(lastInterestDate)) {
-            throw new BankingException("Invalid date to compute interest for account name: " + accountName);
-        }
+    public double getEarnedInterest(Date interestDate) {
+        // monthly interest
+        int numberOfMonths = (int) ((interestDate.getTime() - lastInterestDate.getTime()) / Time.month);
+        System.out.println("Number of months since last interest is " + numberOfMonths);
+        double interestEarned = (double) numberOfMonths / 12.0 * accountInterestRate * accountBalance;
+        System.out.println("Interest earned is " + interestEarned);
+        return interestEarned;
+    }
 
+    public double computeInterest(Date interestDate) throws BankingException {
+        // at the end of the duration the interest payments stop
         if (!afterDuration()) {
-            int numberOfMonths = (int) ((interestDate.getTime() - lastInterestDate.getTime()) / Time.month);
-            System.out.println("Number of months since last interest is " + numberOfMonths);
-            double interestEarned = (double) numberOfMonths / 12.0 * accountInterestRate * accountBalance;
-            System.out.println("Interest earned is " + interestEarned);
-            lastInterestDate = interestDate;
-            accountBalance += interestEarned;
+            return super.computeInterest(interestDate);
         }
         return accountBalance;
     }
