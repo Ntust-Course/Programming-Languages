@@ -102,22 +102,22 @@ public abstract class Account {
     public double getInterestDuration(Date interestDate) {
         int times = 365;
         int number = 0;
+        long duration = interestDate.getTime() - lastInterestDate.getTime();
         switch (interestType) {
         case DAILY:
-            number = (int) ((interestDate.getTime() - lastInterestDate.getTime()) / Time.day);
-            System.out.println("Number of days since last interest is " + number);
+            number = (int) duration / Time.day;
             times = 365;
             break;
         case MONTHLY:
-            number = (int) ((interestDate.getTime() - lastInterestDate.getTime()) / Time.month);
-            System.out.println("Number of months since last interest is " + number);
+            number = (int) duration / Time.month;
             times = 12;
             break;
         case YEARLY:
-            number = (int) ((interestDate.getTime() - lastInterestDate.getTime()) / Time.year);
+            number = (int) duration / Time.year;
             times = 1;
             break;
         }
+        System.out.println("Number of duration since last interest is " + number);
         return (double) number / times;
     }
 
