@@ -194,7 +194,7 @@ class SavingAccount extends Account implements FullFunctionalAccount {
         return super.deposit(amount);
     }
 
-    public double computeInterest(Date interestDate) {
+    public double computeInterest(Date interestDate) throws BankingException {
         return super.computeInterest(interestDate, Time.month, Year.month);
     }
 
