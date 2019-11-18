@@ -1,2 +1,2 @@
 exclude_patterns:
-- "Application.java"
+- "**/Application.java"
