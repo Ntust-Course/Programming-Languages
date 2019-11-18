@@ -39,16 +39,12 @@ interface DepositableAccount extends BasicAccount {
 }
 
 interface InterestableAccount extends BasicAccount {
-    double getInterestDuration(Date interestDate);
+    double getInterestEarned(Date interestDate, long time, int year);
 
     double computeInterest() throws BankingException;
 }
 
 interface FullFunctionalAccount extends WithdrawableAccount, DepositableAccount, InterestableAccount {
-}
-
-enum InterestType {
-    DAILY, MONTHLY, YEARLY
 }
 
 public abstract class Account {
@@ -59,7 +55,6 @@ public abstract class Account {
     protected double accountInterestRate;
     protected Date openDate;
     protected Date lastInterestDate;
-    protected InterestType interestType;
 
     // constructor for every bank accounts
     public Account(String name, double firstDeposit) {
@@ -72,7 +67,6 @@ public abstract class Account {
         openDate = firstDate;
         lastInterestDate = openDate;
         accountInterestRate = 0.12;
-        interestType = InterestType.DAILY;
     }
 
     // public methods for every bank accounts
@@ -99,26 +93,20 @@ public abstract class Account {
         return withdraw(amount, withdrawDate);
     }
 
-    public double getInterestDuration(Date interestDate) {
-        int times = 365;
-        int number = 0;
-        long duration = interestDate.getTime() - lastInterestDate.getTime();
-        switch (interestType) {
-        case DAILY:
-            number = (int) duration / Time.day;
-            times = 365;
-            break;
-        case MONTHLY:
-            number = (int) duration / Time.month;
-            times = 12;
-            break;
-        case YEARLY:
-            number = (int) duration / Time.year;
-            times = 1;
-            break;
-        }
+    public long getInterestDuration(Date interestDate) {
+        return interestDate.getTime() - lastInterestDate.getTime();
+    }
+
+    public double getInterestActualRate(Date interestDate, long time, int year) {
+        int number = (int) (getInterestDuration(interestDate) / time);
         System.out.println("Number of duration since last interest is " + number);
-        return (double) number / times;
+        return (double) number / year;
+    }
+
+    public double getInterestEarned(Date interestDate, long time, int year) {
+        double actualRate = getInterestActualRate(interestDate, time, year);
+        double interestEarned = actualRate * accountInterestRate * accountBalance;
+        return interestEarned;
     }
 
     public double computeInterest() throws BankingException {
@@ -127,11 +115,15 @@ public abstract class Account {
     }
 
     public double computeInterest(Date interestDate) throws BankingException {
+        return computeInterest(interestDate, Time.day, Year.day);
+    }
+
+    public double computeInterest(Date interestDate, long time, int day) throws BankingException {
         if (interestDate.before(lastInterestDate)) {
             throw new BankingException("Invalid date to compute interest for account name: " + accountName);
         }
 
-        double interestEarned = (double) getInterestDuration(interestDate) * accountInterestRate * accountBalance;
+        double interestEarned = getInterestEarned(interestDate, time, day);
         System.out.println("Interest earned is " + interestEarned);
         lastInterestDate = interestDate;
         accountBalance += interestEarned;
@@ -185,12 +177,10 @@ class SavingAccount extends Account implements FullFunctionalAccount {
      */
     SavingAccount(String name, double firstDeposit) {
         super(name, firstDeposit);
-        this.interestType = InterestType.MONTHLY;
     }
 
     SavingAccount(String name, double firstDeposit, Date firstDate) {
         super(name, firstDeposit, firstDate);
-        this.interestType = InterestType.MONTHLY;
     }
 
     /**
@@ -204,6 +194,10 @@ class SavingAccount extends Account implements FullFunctionalAccount {
     public double deposit(double amount) throws BankingException {
         processTransaction();
         return super.deposit(amount);
+    }
+
+    public double getInterestEarned(Date interestDate) {
+        return super.getInterestEarned(interestDate, Time.month, Year.month);
     }
 
     private void processTransaction() {
@@ -259,17 +253,14 @@ class CDAccount extends Account implements FullFunctionalAccount {
      */
     CDAccount(String name, double firstDeposit) {
         super(name, firstDeposit);
-        this.interestType = InterestType.MONTHLY;
     }
 
     CDAccount(String name, double firstDeposit, Date firstDate) {
         super(name, firstDeposit, firstDate);
-        this.interestType = InterestType.MONTHLY;
     }
 
     CDAccount(String name, double firstDeposit, Date firstDate, int month) {
         super(name, firstDeposit, firstDate);
-        this.interestType = InterestType.MONTHLY;
         this.duration = month * Time.month;
     }
 
@@ -292,11 +283,16 @@ class CDAccount extends Account implements FullFunctionalAccount {
         return super.deposit(amount);
     }
 
+    public double getInterestEarned(Date interestDate) {
+        return super.getInterestEarned(interestDate, Time.month, Year.month);
+    }
+
     public double computeInterest(Date interestDate) throws BankingException {
         // at the end of the duration the interest payments stop
         if (!afterDuration()) {
             return super.computeInterest(interestDate);
         }
+        System.out.println("NOTICE: Interest duration is end! Won't get any interest now!");
         return accountBalance;
     }
 
@@ -357,4 +353,10 @@ class Time {
     final static long day = 30 * 24 * 60 * 60 * 1000L;
     final static long month = 30 * day;
     final static long year = 12 * month;
+}
+
+class Year {
+    final static int day = 365;
+    final static int month = 12;
+    final static int year = 1;
 }
