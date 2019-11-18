@@ -39,7 +39,7 @@ interface DepositableAccount extends BasicAccount {
 }
 
 interface InterestableAccount extends BasicAccount {
-    double getEarnedInterest(Date interestDate);
+    double getInterestDuration(Date interestDate);
 
     double computeInterest() throws BankingException;
 }
@@ -93,7 +93,7 @@ public abstract class Account {
         return withdraw(amount, withdrawDate);
     }
 
-    abstract double getEarnedInterest(Date interestDate);
+    abstract double getInterestDuration(Date interestDate);
 
     public double computeInterest() throws BankingException {
         Date interestDate = new Date();
@@ -105,7 +105,8 @@ public abstract class Account {
             throw new BankingException("Invalid date to compute interest for account name: " + accountName);
         }
 
-        double interestEarned = getEarnedInterest(interestDate);
+        double interestEarned = (double) getInterestDuration(interestDate) * accountInterestRate * accountBalance;
+        System.out.println("Interest earned is " + interestEarned);
         lastInterestDate = interestDate;
         accountBalance += interestEarned;
         return accountBalance;
@@ -122,12 +123,11 @@ abstract class DailyInterestAccount extends Account implements InterestableAccou
         super(name, firstDeposit, firstDate);
     }
 
-    public double getEarnedInterest(Date interestDate) {
+    public double getInterestDuration(Date interestDate) {
         int numberOfDays = (int) ((interestDate.getTime() - lastInterestDate.getTime()) / Time.day);
         System.out.println("Number of days since last interest is " + numberOfDays);
-        double interestEarned = (double) numberOfDays / 365.0 * accountInterestRate * accountBalance;
-        System.out.println("Interest earned is " + interestEarned);
-        return interestEarned;
+        int daysOfYear = 365;
+        return (double) numberOfDays / daysOfYear;
     }
 }
 
@@ -141,12 +141,11 @@ abstract class MonthlyInterestAccount extends Account implements InterestableAcc
         super(name, firstDeposit, firstDate);
     }
 
-    public double getEarnedInterest(Date interestDate) {
+    public double getInterestDuration(Date interestDate) {
         int numberOfMonths = (int) ((interestDate.getTime() - lastInterestDate.getTime()) / Time.month);
         System.out.println("Number of months since last interest is " + numberOfMonths);
-        double interestEarned = (double) numberOfMonths / 12.0 * accountInterestRate * accountBalance;
-        System.out.println("Interest earned is " + interestEarned);
-        return interestEarned;
+        int monthsOfYear = 12;
+        return (double) numberOfMonths / monthsOfYear;
     }
 }
 
