@@ -39,8 +39,6 @@ interface DepositableAccount extends BasicAccount {
 }
 
 interface InterestableAccount extends BasicAccount {
-    double getInterestEarned(Date interestDate, long time, int year);
-
     double computeInterest() throws BankingException;
 }
 
@@ -196,8 +194,8 @@ class SavingAccount extends Account implements FullFunctionalAccount {
         return super.deposit(amount);
     }
 
-    public double getInterestEarned(Date interestDate) {
-        return super.getInterestEarned(interestDate, Time.month, Year.month);
+    public double computeInterest(Date interestDate) {
+        return super.computeInterest(interestDate, Time.month, Year.month);
     }
 
     private void processTransaction() {
@@ -283,14 +281,10 @@ class CDAccount extends Account implements FullFunctionalAccount {
         return super.deposit(amount);
     }
 
-    public double getInterestEarned(Date interestDate) {
-        return super.getInterestEarned(interestDate, Time.month, Year.month);
-    }
-
     public double computeInterest(Date interestDate) throws BankingException {
         // at the end of the duration the interest payments stop
         if (!afterDuration()) {
-            return super.computeInterest(interestDate);
+            return super.computeInterest(interestDate, Time.month, Year.month);
         }
         System.out.println("NOTICE: Interest duration is end! Won't get any interest now!");
         return accountBalance;
