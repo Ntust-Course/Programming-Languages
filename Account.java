@@ -311,12 +311,16 @@ class CDAccount extends Account implements FullFunctionalAccount {
 class LoanAccount extends SavingAccount {
 
     /**
-     * TODO: throw Exception on firstDeposit greatEqual 0 <br />
-     * if (firstDeposit >= 0) { throw new BankingException("Balance is always
-     * negative: " + firstDeposit); }
+     * throw Exception on firstDeposit greatEqual 0
      */
     LoanAccount(String name, double firstDeposit) {
         super(name, firstDeposit);
+        if (firstDeposit >= 0) {
+            System.err.println("Balance is always negative: " + firstDeposit);
+            // FIXME: It should throw exception on fisrtDeposit >= 0 but the abstract
+            // account didn't throw an exception
+            // throw new BankingException("Balance is always negative: " + firstDeposit);
+        }
     }
 
     LoanAccount(String name, double firstDeposit, Date firstDate) {
