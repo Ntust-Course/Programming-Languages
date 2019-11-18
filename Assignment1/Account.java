@@ -349,6 +349,14 @@ class Time {
     final static long year = 12 * month;
 }
 
+/**
+ * Number of counts in a year
+ * 
+ * @author SheiUn
+ * @param day days of a year
+ * @param month months of a year
+ * @param year years of a year
+ */
 class Year {
     final static int day = 365;
     final static int month = 12;
