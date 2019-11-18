@@ -93,19 +93,7 @@ public abstract class Account {
         return withdraw(amount, withdrawDate);
     }
 
-    /**
-     * Calulate daily be default.
-     * 
-     * @param interestDate
-     * @return EnardInterest
-     */
-    public double getEarnedInterest(Date interestDate) {
-        int numberOfDays = (int) ((interestDate.getTime() - lastInterestDate.getTime()) / Time.day);
-        System.out.println("Number of days since last interest is " + numberOfDays);
-        double interestEarned = (double) numberOfDays / 365.0 * accountInterestRate * accountBalance;
-        System.out.println("Interest earned is " + interestEarned);
-        return interestEarned;
-    }
+    abstract double getEarnedInterest(Date interestDate);
 
     public double computeInterest() throws BankingException {
         Date interestDate = new Date();
@@ -124,13 +112,51 @@ public abstract class Account {
     }
 }
 
+abstract class DailyInterestAccount extends Account implements InterestableAccount {
+
+    public DailyInterestAccount(String name, double firstDeposit) {
+        super(name, firstDeposit);
+    }
+
+    public DailyInterestAccount(String name, double firstDeposit, Date firstDate) {
+        super(name, firstDeposit, firstDate);
+    }
+
+    public double getEarnedInterest(Date interestDate) {
+        int numberOfDays = (int) ((interestDate.getTime() - lastInterestDate.getTime()) / Time.day);
+        System.out.println("Number of days since last interest is " + numberOfDays);
+        double interestEarned = (double) numberOfDays / 365.0 * accountInterestRate * accountBalance;
+        System.out.println("Interest earned is " + interestEarned);
+        return interestEarned;
+    }
+}
+
+abstract class MonthlyInterestAccount extends Account implements InterestableAccount {
+
+    public MonthlyInterestAccount(String name, double firstDeposit) {
+        super(name, firstDeposit);
+    }
+
+    public MonthlyInterestAccount(String name, double firstDeposit, Date firstDate) {
+        super(name, firstDeposit, firstDate);
+    }
+
+    public double getEarnedInterest(Date interestDate) {
+        int numberOfMonths = (int) ((interestDate.getTime() - lastInterestDate.getTime()) / Time.month);
+        System.out.println("Number of months since last interest is " + numberOfMonths);
+        double interestEarned = (double) numberOfMonths / 12.0 * accountInterestRate * accountBalance;
+        System.out.println("Interest earned is " + interestEarned);
+        return interestEarned;
+    }
+}
+
 /**
  * Derived class: CheckingAccount
  *
  * Description: Interest is computed daily; there's no fee for withdraw; there
  * is a minimum balance of $1000.
  */
-class CheckingAccount extends Account implements FullFunctionalAccount {
+class CheckingAccount extends DailyInterestAccount implements FullFunctionalAccount {
 
     CheckingAccount(String name, double firstDeposit) {
         super(name, firstDeposit);
@@ -158,7 +184,7 @@ class CheckingAccount extends Account implements FullFunctionalAccount {
  * 
  * @author SheiUn
  */
-class SavingAccount extends Account implements FullFunctionalAccount {
+class SavingAccount extends MonthlyInterestAccount implements FullFunctionalAccount {
 
     private int transactionCount = 0;
     private Date lastTransactionDate = new Date();
@@ -208,15 +234,6 @@ class SavingAccount extends Account implements FullFunctionalAccount {
             accountBalance -= transactionFee;
     }
 
-    public double getEarnedInterest(Date interestDate) {
-        // monthly interest
-        int numberOfMonths = (int) ((interestDate.getTime() - lastInterestDate.getTime()) / Time.month);
-        System.out.println("Number of months since last interest is " + numberOfMonths);
-        double interestEarned = (double) numberOfMonths / 12.0 * accountInterestRate * accountBalance;
-        System.out.println("Interest earned is " + interestEarned);
-        return interestEarned;
-    }
-
     /**
      * Check Year and Month is the same in current date and last transaction date.
      */
@@ -238,7 +255,7 @@ class SavingAccount extends Account implements FullFunctionalAccount {
  * and withdrawals cost a $250 fee); at the end of the duration the interest
  * payments stop and you can withdraw w/o fee.
  */
-class CDAccount extends Account implements FullFunctionalAccount {
+class CDAccount extends MonthlyInterestAccount implements FullFunctionalAccount {
 
     /**
      * 12 months by default, save as long just convenient calc with long time
@@ -280,15 +297,6 @@ class CDAccount extends Account implements FullFunctionalAccount {
             throw new BankingException("Can't deposit during interest.");
         }
         return super.deposit(amount);
-    }
-
-    public double getEarnedInterest(Date interestDate) {
-        // monthly interest
-        int numberOfMonths = (int) ((interestDate.getTime() - lastInterestDate.getTime()) / Time.month);
-        System.out.println("Number of months since last interest is " + numberOfMonths);
-        double interestEarned = (double) numberOfMonths / 12.0 * accountInterestRate * accountBalance;
-        System.out.println("Interest earned is " + interestEarned);
-        return interestEarned;
     }
 
     public double computeInterest(Date interestDate) throws BankingException {
