@@ -26,33 +26,42 @@ abstract class Account {
     #openDate: Date
     #lastInterestDate: Date
 
-    // 建構子
+    +Account (String, double)
     +Account (String, double, Date)
 
     +name(): String
     +balance(): double
     +deposit(double): double
     +withdraw(double): double
-    +{abstract} withdraw(double, Date): double
+    +withdraw(double, Date): double
 }
 
 class CheckingAccount extends Account implements FullFunctionalAccount {
+    +CheckingAccount(String, double)
+    +CheckingAccount(String, double, Date)
+
     +withdraw(double, Date): double
-    +computeInterest(Date): double
 }
 
 class SavingAccount extends Account implements FullFunctionalAccount {
+    +SavingAccount(String, double)
+    +SavingAccount(String, double, Date)
+
     -transactionCount: int
     -lastTransactionDate: Date
     -transactionFee: int
 
     +withdraw(double, Date): double
     +computeInterest(Date): double
+    -processTransaction(): void
+    -processTransaction(Date): void
     -isNewMonth(): boolean
 }
 
 class CDAccount extends Account implements FullFunctionalAccount {
     -duration: long
+    +CDAccount(String, double)
+    +CDAccount(String, double, Date)
 
     +withdraw(double, Date): double
     +deposit(double): double
@@ -62,14 +71,21 @@ class CDAccount extends Account implements FullFunctionalAccount {
 
 class LoanAccount extends SavingAccount {
     +LoanAccount(String, double)
+    +LoanAccount(String, double, Date)
 
     +double withdraw(double)
     +double deposit(double)
 }
 
 class Time {
-    {static} +long day
-    {static} +long month
-    {static} +long year
+    {static} +day: long
+    {static} +month: long
+    {static} +year: long
+}
+
+class Year {
+    {static} +day: int
+    {static} +month: int
+    {static} +year: int
 }
 @enduml
