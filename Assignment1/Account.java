@@ -344,7 +344,7 @@ class LoanAccount extends SavingAccount {
  * @param YEAR  milliseconds of a year
  */
 class Time {
-    final static long DAY = 30 * 24 * 60 * 60 * 1000L;
+    final static long DAY = 24 * 60 * 60 * 1000L;
     final static long MONTH = 30 * DAY;
     final static long YEAR = 12 * MONTH;
 }
