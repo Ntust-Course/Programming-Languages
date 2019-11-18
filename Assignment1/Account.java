@@ -153,7 +153,6 @@ class CheckingAccount extends Account implements FullFunctionalAccount {
 
     CheckingAccount(String name, double firstDeposit, Date firstDate) {
         super(name, firstDeposit, firstDate);
-        System.out.println("accountBalance: " + accountBalance);
     }
 
     public double withdraw(double amount, Date withdrawDate) throws BankingException {
@@ -186,10 +185,12 @@ class SavingAccount extends Account implements FullFunctionalAccount {
      */
     SavingAccount(String name, double firstDeposit) {
         super(name, firstDeposit);
+        this.interestType = InterestType.MONTHLY;
     }
 
     SavingAccount(String name, double firstDeposit, Date firstDate) {
         super(name, firstDeposit, firstDate);
+        this.interestType = InterestType.MONTHLY;
     }
 
     /**
@@ -257,15 +258,18 @@ class CDAccount extends Account implements FullFunctionalAccount {
      * @param month duration of interest 12 months by default
      */
     CDAccount(String name, double firstDeposit) {
-        super(name, firstDeposit, new Date());
+        super(name, firstDeposit);
+        this.interestType = InterestType.MONTHLY;
     }
 
     CDAccount(String name, double firstDeposit, Date firstDate) {
         super(name, firstDeposit, firstDate);
+        this.interestType = InterestType.MONTHLY;
     }
 
     CDAccount(String name, double firstDeposit, Date firstDate, int month) {
         super(name, firstDeposit, firstDate);
+        this.interestType = InterestType.MONTHLY;
         this.duration = month * Time.month;
     }
 
