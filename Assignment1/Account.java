@@ -47,6 +47,10 @@ interface InterestableAccount extends BasicAccount {
 interface FullFunctionalAccount extends WithdrawableAccount, DepositableAccount, InterestableAccount {
 }
 
+enum InterestType {
+    DAILY, MONTHLY, YEARLY
+}
+
 public abstract class Account {
 
     // protected variables to store commom attributes for every bank accounts
@@ -55,6 +59,7 @@ public abstract class Account {
     protected double accountInterestRate;
     protected Date openDate;
     protected Date lastInterestDate;
+    protected InterestType interestType;
 
     // constructor for every bank accounts
     public Account(String name, double firstDeposit) {
@@ -67,6 +72,7 @@ public abstract class Account {
         openDate = firstDate;
         lastInterestDate = openDate;
         accountInterestRate = 0.12;
+        interestType = InterestType.DAILY;
     }
 
     // public methods for every bank accounts
@@ -93,7 +99,27 @@ public abstract class Account {
         return withdraw(amount, withdrawDate);
     }
 
-    abstract double getInterestDuration(Date interestDate);
+    public double getInterestDuration(Date interestDate) {
+        int times = 365;
+        int number = 0;
+        switch (interestType) {
+        case DAILY:
+            number = (int) ((interestDate.getTime() - lastInterestDate.getTime()) / Time.day);
+            System.out.println("Number of days since last interest is " + number);
+            times = 365;
+            break;
+        case MONTHLY:
+            number = (int) ((interestDate.getTime() - lastInterestDate.getTime()) / Time.month);
+            System.out.println("Number of months since last interest is " + number);
+            times = 12;
+            break;
+        case YEARLY:
+            number = (int) ((interestDate.getTime() - lastInterestDate.getTime()) / Time.year);
+            times = 1;
+            break;
+        }
+        return (double) number / times;
+    }
 
     public double computeInterest() throws BankingException {
         Date interestDate = new Date();
@@ -113,49 +139,13 @@ public abstract class Account {
     }
 }
 
-abstract class DailyInterestAccount extends Account implements InterestableAccount {
-
-    public DailyInterestAccount(String name, double firstDeposit) {
-        super(name, firstDeposit);
-    }
-
-    public DailyInterestAccount(String name, double firstDeposit, Date firstDate) {
-        super(name, firstDeposit, firstDate);
-    }
-
-    public double getInterestDuration(Date interestDate) {
-        int numberOfDays = (int) ((interestDate.getTime() - lastInterestDate.getTime()) / Time.day);
-        System.out.println("Number of days since last interest is " + numberOfDays);
-        int daysOfYear = 365;
-        return (double) numberOfDays / daysOfYear;
-    }
-}
-
-abstract class MonthlyInterestAccount extends Account implements InterestableAccount {
-
-    public MonthlyInterestAccount(String name, double firstDeposit) {
-        super(name, firstDeposit);
-    }
-
-    public MonthlyInterestAccount(String name, double firstDeposit, Date firstDate) {
-        super(name, firstDeposit, firstDate);
-    }
-
-    public double getInterestDuration(Date interestDate) {
-        int numberOfMonths = (int) ((interestDate.getTime() - lastInterestDate.getTime()) / Time.month);
-        System.out.println("Number of months since last interest is " + numberOfMonths);
-        int monthsOfYear = 12;
-        return (double) numberOfMonths / monthsOfYear;
-    }
-}
-
 /**
  * Derived class: CheckingAccount
  *
  * Description: Interest is computed daily; there's no fee for withdraw; there
  * is a minimum balance of $1000.
  */
-class CheckingAccount extends DailyInterestAccount implements FullFunctionalAccount {
+class CheckingAccount extends Account implements FullFunctionalAccount {
 
     CheckingAccount(String name, double firstDeposit) {
         super(name, firstDeposit);
@@ -183,7 +173,7 @@ class CheckingAccount extends DailyInterestAccount implements FullFunctionalAcco
  * 
  * @author SheiUn
  */
-class SavingAccount extends MonthlyInterestAccount implements FullFunctionalAccount {
+class SavingAccount extends Account implements FullFunctionalAccount {
 
     private int transactionCount = 0;
     private Date lastTransactionDate = new Date();
@@ -254,7 +244,7 @@ class SavingAccount extends MonthlyInterestAccount implements FullFunctionalAcco
  * and withdrawals cost a $250 fee); at the end of the duration the interest
  * payments stop and you can withdraw w/o fee.
  */
-class CDAccount extends MonthlyInterestAccount implements FullFunctionalAccount {
+class CDAccount extends Account implements FullFunctionalAccount {
 
     /**
      * 12 months by default, save as long just convenient calc with long time
