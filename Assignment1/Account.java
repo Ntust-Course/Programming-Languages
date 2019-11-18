@@ -113,7 +113,7 @@ public abstract class Account {
     }
 
     public double computeInterest(Date interestDate) throws BankingException {
-        return computeInterest(interestDate, Time.day, Year.day);
+        return computeInterest(interestDate, Time.DAY, Year.DAY);
     }
 
     public double computeInterest(Date interestDate, long time, int day) throws BankingException {
@@ -195,7 +195,7 @@ class SavingAccount extends Account implements FullFunctionalAccount {
     }
 
     public double computeInterest(Date interestDate) throws BankingException {
-        return super.computeInterest(interestDate, Time.month, Year.month);
+        return super.computeInterest(interestDate, Time.MONTH, Year.MONTH);
     }
 
     private void processTransaction() {
@@ -242,12 +242,12 @@ class CDAccount extends Account implements FullFunctionalAccount {
     /**
      * 12 months by default, save as long just convenient calc with long time
      */
-    private long duration = 12 * Time.month;
+    private long duration = 12 * Time.MONTH;
 
     /**
      * Constructor of CDAccount another params are same as Account
      * 
-     * @param month duration of interest 12 months by default
+     * @param MONTH duration of interest 12 months by default
      */
     CDAccount(String name, double firstDeposit) {
         super(name, firstDeposit);
@@ -259,7 +259,7 @@ class CDAccount extends Account implements FullFunctionalAccount {
 
     CDAccount(String name, double firstDeposit, Date firstDate, int month) {
         super(name, firstDeposit, firstDate);
-        this.duration = month * Time.month;
+        this.duration = month * Time.MONTH;
     }
 
     /**
@@ -284,7 +284,7 @@ class CDAccount extends Account implements FullFunctionalAccount {
     public double computeInterest(Date interestDate) throws BankingException {
         // at the end of the duration the interest payments stop
         if (!afterDuration()) {
-            return super.computeInterest(interestDate, Time.month, Year.month);
+            return super.computeInterest(interestDate, Time.MONTH, Year.MONTH);
         }
         System.out.println("NOTICE: Interest duration is end! Won't get any interest now!");
         return accountBalance;
@@ -339,26 +339,26 @@ class LoanAccount extends SavingAccount {
  * Use to calculate common time units.
  * 
  * @author SheiUn
- * @param day   milliseconds of a day
- * @param month milliseconds of a month
- * @param year  milliseconds of a year
+ * @param DAY   milliseconds of a day
+ * @param MONTH milliseconds of a month
+ * @param YEAR  milliseconds of a year
  */
 class Time {
-    final static long day = 30 * 24 * 60 * 60 * 1000L;
-    final static long month = 30 * day;
-    final static long year = 12 * month;
+    final static long DAY = 30 * 24 * 60 * 60 * 1000L;
+    final static long MONTH = 30 * DAY;
+    final static long YEAR = 12 * MONTH;
 }
 
 /**
  * Number of counts in a year
  * 
  * @author SheiUn
- * @param day days of a year
- * @param month months of a year
- * @param year years of a year
+ * @param DAY days of a year
+ * @param MONTH months of a year
+ * @param YEAR years of a year
  */
 class Year {
-    final static int day = 365;
-    final static int month = 12;
-    final static int year = 1;
+    final static int DAY = 365;
+    final static int MONTH = 12;
+    final static int YEAR = 1;
 }
