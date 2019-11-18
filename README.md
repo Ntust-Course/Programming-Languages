@@ -1,5 +1,5 @@
 # Programming Languages
 
-## Homework
+## Assignment
 
-- [Banking System](Homework1)
+- [Banking System](Assignment1)
