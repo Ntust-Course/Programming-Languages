@@ -96,6 +96,49 @@ public class Application {
             } catch (Exception e) {
                 stdExceptionPrinting(e, account.balance());
             }
+
+            // future
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.YEAR, 2);
+            // set date to year after next year
+            d = cal.getTime();
+
+            // compute interest for all accounts
+            try {
+                double newBalance = account.computeInterest(d);
+                stdBankingPrinting(account.name(), newBalance);
+            } catch (Exception e) {
+                stdExceptionPrinting(e, account.balance());
+            }
+
+            // withdraw for all accounts
+            try {
+                double newBalance = account.withdraw(100.0, d);
+                stdBankingPrinting(account.name(), newBalance);
+            } catch (Exception e) {
+                stdExceptionPrinting(e, account.balance());
+            }
+
+            // past
+            cal = Calendar.getInstance();
+            cal.add(Calendar.YEAR, -2);
+            d = cal.getTime();
+
+            // compute interest for all accounts
+            try {
+                double newBalance = account.computeInterest(d);
+                stdBankingPrinting(account.name(), newBalance);
+            } catch (Exception e) {
+                stdExceptionPrinting(e, account.balance());
+            }
+
+            // withdraw for all accounts $5000
+            try {
+                double newBalance = account.withdraw(5000.0, d);
+                stdBankingPrinting(account.name(), newBalance);
+            } catch (Exception e) {
+                stdExceptionPrinting(e, account.balance());
+            }
         }
     }
 
