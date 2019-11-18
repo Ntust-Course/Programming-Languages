@@ -98,9 +98,9 @@ public abstract class Account {
     }
 
     public double getInterestActualRate(Date interestDate, long time, int year) {
-        int number = (int) (getInterestDuration(interestDate) / time);
-        System.out.println("Number of duration since last interest is " + number);
-        return (double) number / year;
+        int count = (int) (getInterestDuration(interestDate) / time);
+        System.out.println("Number of duration since last interest is " + count);
+        return (double) count / year;
     }
 
     public double getInterestEarned(Date interestDate, long time, int year) {
